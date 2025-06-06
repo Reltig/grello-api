@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - echo "Building the project..."
+      - go build -o server.exe
+  run:
+    cmds:
+      - echo "Running the project"
+      - go build -o server.exe
+      - server.exe
