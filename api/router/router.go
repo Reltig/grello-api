@@ -1,16 +1,23 @@
 package router
 
 import (
-	"grello-api/api/hander"
+	"grello-api/api/handler"
+	"grello-api/api/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
-	api := app.Group("/api")
+	// Auth
+	auth := app.Group("/auth")
+	auth.Post("/login", handler.Login)
+	auth.Get("/user-data", middleware.Protected(), handler.UserData)
+
+	// Api
+	api := app.Group("/api", middleware.Protected())
 
 	// User
-	user := api.Group("user")
-	user.Get("/:id", hander.GetUser)
-	user.Post("/", hander.CreateUser)
+	user := api.Group("/user")
+	user.Get("/:id", handler.GetUser)
+	user.Post("/", handler.CreateUser)
 }

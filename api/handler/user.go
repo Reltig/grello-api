@@ -1,4 +1,4 @@
-package hander
+package handler
 
 import (
 	"grello-api/api/request"
@@ -26,19 +26,19 @@ func GetUser(c *fiber.Ctx) error {
 	db := database.DB
 	var user model.User
 	db.Find(&user, id)
-	if (user.ID == 0 ) {
+	if user.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No product found with ID", "data": nil})
 	}
 	return c.JSON(fiber.Map{
-		"status": "success", 
-		"message": "Product found", 
-		"data": response.UserResponse{}.FromModel(&user),
+		"status":  "success",
+		"message": "Product found",
+		"data":    response.UserResponse{}.FromModel(&user),
 	})
 }
 
 func CreateUser(c *fiber.Ctx) error {
 	db := database.DB
-	request := new(request.CreateUserReqeust)
+	request := new(request.CreateUserRequest)
 	if err := c.BodyParser(request); err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "errors": err.Error()})
 	}
@@ -54,10 +54,10 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	user := model.User{
-		Username: request.Username,
-		Email: request.Email,
-		Password: hash,
-		FirstName: request.FirstName,
+		Username:   request.Username,
+		Email:      request.Email,
+		Password:   hash,
+		FirstName:  request.FirstName,
 		SecondName: request.SecondName,
 	}
 	if err := db.Create(&user).Error; err != nil {
@@ -65,8 +65,8 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"status": "success", 
-		"message": "Created user", 
-		"data": response.UserResponse{}.FromModel(&user),
+		"status":  "success",
+		"message": "Created user",
+		"data":    response.UserResponse{}.FromModel(&user),
 	})
 }
