@@ -27,30 +27,26 @@ func GetUser(c *fiber.Ctx) error {
 	var user model.User
 	db.Find(&user, id)
 	if user.ID == 0 {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No product found with ID", "data": nil})
+		return response.NotFound(c, "No user found with ID", nil)
 	}
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Product found",
-		"data":    response.UserResponse{}.FromModel(&user),
-	})
+	return response.Ok(c, "User found", response.User{}.FromModel(&user))
 }
 
 func CreateUser(c *fiber.Ctx) error {
 	db := database.DB
-	request := new(request.CreateUserRequest)
+	request := new(request.CreateUser)
 	if err := c.BodyParser(request); err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "errors": err.Error()})
+		return response.BadRequest(c, "Review your input", err.Error())
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid request body", "errors": err.Error()})
+		return response.BadRequest(c, "Invalid request body", err.Error())
 	}
 
 	hash, err := hashPassword(request.Password)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't hash password", "errors": err.Error()})
+		return response.BadRequest(c, "Couldn't hash password", err.Error())
 	}
 
 	user := model.User{
@@ -61,12 +57,59 @@ func CreateUser(c *fiber.Ctx) error {
 		SecondName: request.SecondName,
 	}
 	if err := db.Create(&user).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't create user", "errors": err.Error()})
+		return response.BadRequest(c, "Couldn't create user", err.Error())
 	}
 
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Created user",
-		"data":    response.UserResponse{}.FromModel(&user),
-	})
+	return response.Ok(c, "Created user", response.User{}.FromModel(&user))
+}
+
+func UpdateUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DB
+	request := new(request.UpdateUser)
+	if err := c.BodyParser(request); err != nil {
+		return response.BadRequest(c, "Review your input", err.Error())
+	}
+	var user model.User
+	db.Find(&user, id)
+	if user.ID == 0 {
+		return response.NotFound(c, "No user found with ID", nil)
+	}
+	if request.Username != nil {
+		user.Username = *request.Username
+	}
+	if request.FirstName != nil {
+		user.FirstName = request.FirstName
+	}
+	if request.SecondName != nil {
+		user.SecondName = request.SecondName
+	}
+	if request.Email != nil {
+		user.Email = *request.Email
+	}
+	if request.Password != nil {
+		hash, err := hashPassword(*request.Password)
+		if err != nil {
+			return response.BadRequest(c, "Couldn't hash password", err.Error())
+		}
+		user.Password = hash
+	}
+	if err := db.Save(&user).Error; err != nil {
+		return response.InternalServerError(c, "Database error: couldn't update user", nil)
+	}
+	return response.Ok(c, "User updated", response.User{}.FromModel(&user))
+}
+
+func DeleteUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DB
+	var user model.User
+	db.Find(&user, id)
+	if user.ID == 0 {
+		return response.NotFound(c, "No user found with ID", nil)
+	}
+	if err := db.Delete(&user).Error; err != nil {
+		return response.InternalServerError(c, "Database error: couldn't delete user", nil)
+	}
+	return response.Ok(c, "User deleted", response.User{}.FromModel(&user))
 }

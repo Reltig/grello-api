@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"grello-api/api/request"
+	"grello-api/api/response"
 	"time"
 
 	"grello-api/config"
@@ -35,22 +36,22 @@ func getUserByUsername(username string) (*model.User, error) {
 
 // Login
 func Login(c *fiber.Ctx) error {
-	input := new(request.LoginRequest)
+	input := new(request.Login)
 
 	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Error on login request", "data": err})
+		return response.BadRequest(c, "Error on login request", err.Error())
 	}
 
 	user, err := getUserByUsername(input.Username)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Internal Server Error", "data": err})
+		return response.InternalServerError(c, "DB error", err.Error())
 	}
 	if user == nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": err})
+		return response.Unauthorized(c, "Invalid username or password", err.Error())
 	}
 	if !CheckPasswordHash(input.Password, user.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "Invalid username or password", "data": nil})
+		return response.Unauthorized(c, "Invalid username or password", nil)
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -64,15 +65,15 @@ func Login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Success login", "data": t})
+	return response.Ok(c, "Success login", t)
 }
 
 func UserData(c *fiber.Ctx) error {
 	user := c.Locals("user")
 	if user == nil {
-		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "No token", "data": nil}) 
+		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "No token", "data": nil})
 	}
 	token := user.(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
-	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "You trying get other user data", "data": claims}) 
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "You trying get other user data", "data": claims})
 }
