@@ -25,22 +25,6 @@ func main() {
 
 	router.SetupRoutes(app)
 
-	printRoutes(app)
-
 	port := fmt.Sprintf(":%s", config.Config("APP_PORT"))
 	log.Fatal(app.Listen(port))
-}
-
-func printRoutes(app *fiber.App) {
-	fmt.Println("╔════════════════════════════════════════════╗")
-	fmt.Println("║                 ROUTES LIST                 ║")
-	fmt.Println("╠══════════╦══════════════════════════════════╣")
-	fmt.Println("║ METHOD   ║ PATH                             ║")
-	fmt.Println("╠══════════╬══════════════════════════════════╣")
-	
-	for _, route := range app.GetRoutes() {
-		fmt.Printf("║ %-8s ║ %-32s ║\n", route.Method, route.Path)
-	}
-	
-	fmt.Println("╚══════════╩══════════════════════════════════╝")
 }
