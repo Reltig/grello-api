@@ -1,0 +1,23 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - echo "Building the project..."
+      - go build -o server.exe cmd/main.go
+  run:
+    cmds:
+      - echo "Running the project..."
+      - go build -o server.exe cmd/main.go
+      - ./server.exe
+    silent: true
+  docker:up:
+    cmds:
+      - echo "Run containers via docker compose..."
+      - docker compose up -d
+    silent: true
+  docker:down:
+    cmds:
+      - echo "Shutdown containers via docker compose..."
+      - docker compose down
+    silent: true

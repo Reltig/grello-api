@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - echo "Building the project..."
+      - go build -o server cmd/main.go
+  run:
+    cmds:
+      - echo "Running the project..."
+      - go build -o server
+      - ./server
+  docker:up:
+    cmds:
+      - echo "Run containers via docker compose..."
+      - docker compose up -d
+    silent: true
+  docker:down:
+    cmds:
+      - echo "Shutdown containers via docker compose..."
+      - docker compose down
+    silent: true
+  db:connect:
+    cmds:
+      - echo "Connect to database..."
+      - psql -h $DB_HOST -d $DB_NAME -p $DB_PORT -U $DB_USERNAME -W
+    silent: true
+   
