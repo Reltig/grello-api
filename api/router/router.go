@@ -22,5 +22,13 @@ func SetupRoutes(app *fiber.App) {
 	user.Post("/", handler.CreateUser)
 	user.Patch("/:id", handler.UpdateUser)
 	user.Delete("/:id", handler.DeleteUser)
+	user.Get("/:id/workspaces", handler.GetUserWorkspaces)
+
+	// Workspace
+	workspace := api.Group("/workspace")
+	workspace.Get("/:id", handler.GetWorkspace)
+	workspace.Post("/", handler.CreateWorkspace)
+	workspace.Patch("/:id", handler.UpdateWorkspace)
+	workspace.Delete("/:id", handler.DeleteWorkspace)
 	
 }

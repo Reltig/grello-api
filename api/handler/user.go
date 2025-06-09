@@ -101,3 +101,13 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 	return response.Ok(c, "User deleted", response.User{}.FromModel(&user))
 }
+
+func GetUserWorkspaces(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DB
+	var user model.User
+	if err := db.Model(&model.User{}).Preload("Workspaces").Find(&user, id).Error; err != nil {
+		return response.InternalServerError(c, "Database error: couldn't get user workspaces", nil)
+	}
+	return response.Ok(c, "User workspaces", response.Workspace{}.FromModelCollection(user.Workspaces))
+}

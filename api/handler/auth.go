@@ -9,12 +9,17 @@ import (
 	"grello-api/config"
 	"grello-api/database"
 	"grello-api/internal/model"
+	"grello-api/internal/utils"
 
 	"gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	SECRET = config.Config("SECRET")
 )
 
 func CheckPasswordHash(password, hash string) bool {
@@ -48,7 +53,7 @@ func Login(c *fiber.Ctx) error {
 		return response.InternalServerError(c, "DB error", err.Error())
 	}
 	if user == nil {
-		return response.Unauthorized(c, "Invalid username or password", err.Error())
+		return response.Unauthorized(c, "Invalid username or password", nil)
 	}
 	if !CheckPasswordHash(input.Password, user.Password) {
 		return response.Unauthorized(c, "Invalid username or password", nil)
@@ -60,7 +65,7 @@ func Login(c *fiber.Ctx) error {
 	claims["user_id"] = user.ID
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-	t, err := token.SignedString([]byte(config.Config("SECRET")))
+	t, err := token.SignedString([]byte(SECRET))
 	if err != nil {
 		return response.InternalServerError(c, "Error while signing token", err.Error())
 	}
@@ -69,14 +74,9 @@ func Login(c *fiber.Ctx) error {
 }
 
 func UserData(c *fiber.Ctx) error {
-	user := c.Locals("user")
-	if user == nil {
-		return response.Unauthorized(c, "No token", nil)
+	auth, err := utils.Auth(c)
+	if err != nil {
+		return err
 	}
-	token := user.(*jwt.Token)
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return response.Unauthorized(c, "No token", nil)
-	}
-	return response.Ok(c, "You trying get other user data", claims)
+	return response.Ok(c, "Your user data", auth)
 }

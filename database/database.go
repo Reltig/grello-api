@@ -31,6 +31,6 @@ func ConnectDb() {
 		log.Fatal("Failed to connect to database. \n", err)
 	}
 	//db.Logger = logger.Default.LogMode(logger.Info)
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.User{}, &model.Workspace{})
 	DB = db
 }
