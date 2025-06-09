@@ -62,7 +62,7 @@ func Login(c *fiber.Ctx) error {
 
 	t, err := token.SignedString([]byte(config.Config("SECRET")))
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return response.InternalServerError(c, "Error while signing token", err.Error())
 	}
 
 	return response.Ok(c, "Success login", t)
@@ -71,9 +71,12 @@ func Login(c *fiber.Ctx) error {
 func UserData(c *fiber.Ctx) error {
 	user := c.Locals("user")
 	if user == nil {
-		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "No token", "data": nil})
+		return response.Unauthorized(c, "No token", nil)
 	}
 	token := user.(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "You trying get other user data", "data": claims})
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return response.Unauthorized(c, "No token", nil)
+	}
+	return response.Ok(c, "You trying get other user data", claims)
 }
