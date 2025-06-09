@@ -75,26 +75,14 @@ func UpdateUser(c *fiber.Ctx) error {
 	if user.ID == 0 {
 		return response.NotFound(c, "No user found with ID", nil)
 	}
-	if request.Username != nil {
-		user.Username = *request.Username
-	}
-	if request.FirstName != nil {
-		user.FirstName = request.FirstName
-	}
-	if request.SecondName != nil {
-		user.SecondName = request.SecondName
-	}
-	if request.Email != nil {
-		user.Email = *request.Email
-	}
 	if request.Password != nil {
 		hash, err := hashPassword(*request.Password)
 		if err != nil {
 			return response.BadRequest(c, "Couldn't hash password", err.Error())
 		}
-		user.Password = hash
+		request.Password = &hash
 	}
-	if err := db.Save(&user).Error; err != nil {
+	if err := db.Model(&user).Updates(request).Error; err != nil {
 		return response.InternalServerError(c, "Database error: couldn't update user", nil)
 	}
 	return response.Ok(c, "User updated", response.User{}.FromModel(&user))
