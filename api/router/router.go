@@ -30,5 +30,12 @@ func SetupRoutes(app *fiber.App) {
 	workspace.Post("/", handler.CreateWorkspace)
 	workspace.Patch("/:id", handler.UpdateWorkspace)
 	workspace.Delete("/:id", handler.DeleteWorkspace)
+
+	// Board
+	board := api.Group("/board")
+	board.Get("/:id", handler.GetBoard)
+	board.Post("/", handler.CreateBoard)
+	board.Patch("/:id", handler.UpdateBoard)
+	board.Delete("/:id", handler.DeleteBoard)
 	
 }

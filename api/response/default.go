@@ -44,7 +44,7 @@ func Forbidden(c *fiber.Ctx, message string, data interface{}) error {
 }
 
 func NotFound(c *fiber.Ctx, message string, data interface{}) error {
-	return defaultErrorResponse(c, 403, message, data)
+	return defaultErrorResponse(c, 404, message, data)
 }
 
 func InternalServerError(c *fiber.Ctx, message string, data interface{}) error {

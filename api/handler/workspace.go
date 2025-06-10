@@ -96,15 +96,15 @@ func DeleteWorkspace(c *fiber.Ctx) error {
 	if workspace.ID == 0 {
 		return response.NotFound(c, "No workspace found with ID", nil)
 	}
-	if err := db.Delete(&workspace).Error; err != nil {
-		return response.InternalServerError(c, "Database error: couldn't delete workspace", nil)
-	}
 	auth, err := utils.Auth(c)
 	if err != nil {
 		return err
 	}
 	if auth.UserID != workspace.UserID {
 		return response.Unauthorized(c, "You don't have permission to delete this workspace", nil)
+	}
+	if err := db.Delete(&workspace).Error; err != nil {
+		return response.InternalServerError(c, "Database error: couldn't delete workspace", err.Error())
 	}
 	return response.Ok(c, "Workspace deleted", response.Workspace{}.FromModel(&workspace))
 }
