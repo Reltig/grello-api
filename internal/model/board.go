@@ -9,4 +9,5 @@ type Board struct {
 	Public       bool
 	WorkspaceID  uint
 	Users 		 []*User `gorm:"many2many:user_boards;"`
+	CardGroups	 []CardGroup
 }

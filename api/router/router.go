@@ -38,4 +38,10 @@ func SetupRoutes(app *fiber.App) {
 	board.Patch("/:id", handler.UpdateBoard)
 	board.Delete("/:id", handler.DeleteBoard)
 	
+	// Card group
+	cardGroup := api.Group("/card-group")
+	cardGroup.Get("/:id", handler.GetCardGroup)
+	cardGroup.Post("/", handler.CreateCardGroup)
+	cardGroup.Patch("/:id", handler.UpdateCardGroup)
+	cardGroup.Delete("/:id", handler.DeleteCardGroup)
 }
