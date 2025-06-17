@@ -6,6 +6,7 @@ import (
 	"grello-api/database"
 	"grello-api/internal/model"
 	"grello-api/internal/utils"
+	"grello-api/pkg/collections"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -29,7 +30,7 @@ func GetBoard(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if auth.UserID != workspace.UserID {
+	if auth.UserID != workspace.OwnerID && collections.Any(workspace.Users, func(user *model.User) bool { return user.ID == auth.UserID }) {
 		return response.Unauthorized(c, "You don't have permission to watch this board", nil)
 	}
 
@@ -59,7 +60,7 @@ func CreateBoard(c *fiber.Ctx) error {
 		return err
 	}
 
-	if auth.UserID != workspace.UserID {
+	if auth.UserID != workspace.OwnerID {
 		return response.Unauthorized(c, "You don't have permission to link board with this workspace", nil)
 	}
 
@@ -99,7 +100,7 @@ func UpdateBoard(c *fiber.Ctx) error {
 	if workspace.ID == 0 {
 		return response.NotFound(c, "No workspace found with ID", nil)
 	}
-	if auth.UserID != workspace.UserID {
+	if auth.UserID != workspace.OwnerID {
 		return response.Unauthorized(c, "You don't have permission to update this board", nil)
 	}
 
@@ -126,7 +127,7 @@ func DeleteBoard(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if auth.UserID != workspace.UserID {
+	if auth.UserID != workspace.OwnerID {
 		return response.Unauthorized(c, "You don't have permission to delete this board", nil)
 	}
 	if err := db.Delete(&board).Error; err != nil {

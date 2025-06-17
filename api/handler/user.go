@@ -15,8 +15,8 @@ import (
 var (
 	BCRYPT_COST = config.ConfigInt("BCRYPT_COST")
 )
-
-func hashPassword(password string) (string, error) {
+//TODO: move to utils
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), BCRYPT_COST)
 	return string(bytes), err
 }
@@ -44,7 +44,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return response.BadRequest(c, "Invalid request body", err.Error())
 	}
 
-	hash, err := hashPassword(request.Password)
+	hash, err := HashPassword(request.Password)
 	if err != nil {
 		return response.BadRequest(c, "Couldn't hash password", err.Error())
 	}
@@ -76,7 +76,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		return response.NotFound(c, "No user found with ID", nil)
 	}
 	if request.Password != nil {
-		hash, err := hashPassword(*request.Password)
+		hash, err := HashPassword(*request.Password)
 		if err != nil {
 			return response.BadRequest(c, "Couldn't hash password", err.Error())
 		}
@@ -109,5 +109,5 @@ func GetUserWorkspaces(c *fiber.Ctx) error {
 	if err := db.Model(&model.User{}).Preload("Workspaces").Find(&user, id).Error; err != nil {
 		return response.InternalServerError(c, "Database error: couldn't get user workspaces", nil)
 	}
-	return response.Ok(c, "User workspaces", response.Workspace{}.FromModelCollection(user.Workspaces))
+	return response.Ok(c, "User workspaces", response.Workspace{}.FromModelCollection(user.OwnedWorkspaces))
 }

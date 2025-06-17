@@ -9,7 +9,7 @@ type Workspace struct {
 	ID			uint   `json:"id"`
 	Name 		string `json:"name"`
 	Description string `json:"description"`
-	UserID 		uint   `json:"user_id"`
+	OwnerID 		uint   `json:"user_id"`
 }
 
 func (resp Workspace) FromModel(workspace *model.Workspace) Workspace {
@@ -17,7 +17,7 @@ func (resp Workspace) FromModel(workspace *model.Workspace) Workspace {
 		ID:			 workspace.ID,
 		Name:   	 workspace.Name,
 		Description: workspace.Description,
-		UserID:  	 workspace.UserID,
+		OwnerID:  	 workspace.OwnerID,
 	}
 }
 

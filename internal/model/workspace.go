@@ -6,6 +6,7 @@ type Workspace struct {
 	gorm.Model
 	Name 		string
 	Description string
-	UserID		uint
+	OwnerID		uint
+	Users		[]*User `gorm:"many2many:user_workspaces;"`
 	Boards		[]Board
 }
